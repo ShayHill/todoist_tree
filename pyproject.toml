@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "todoist-tree"
+version = "0.1.0"
+description = "Create a tree from Todoist projects > sections > tasks"
+authors = ["Shay Hill <shay_public@hotmail.com>"]
+readme = "README.md"
+packages = [{include = "todoist_tree", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.28.2"
+
+
+[tool.poetry.group.dev.dependencies]
+commitizen = "^2.39.1"
+pre-commit = "^2.21.0"
+types-requests = "^2.28.11.8"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "$version"
+version_files = [
+    "pyproject.toml:^version"
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/__pycache__.py"]
+
+pythonVersion = "3.10"
+pythonPlatform = "Any"
+
+typeCheckingMode = "strict"
+reportShadowedImports = true
+reportCallInDefaultInitializer = true
+reportImplicitStringConcatenation = true
+# reportMissingSuperCall = true
+reportPropertyTypeMismatch = true
+reportUninitializedInstanceVariable = true
+reportUnnecessaryTypeIgnoreComment = true
+reportUnusedCallResult = true
+
+venvPath = "C:\\Users\\shaya\\AppData\\Local\\pypoetry\\Cache\\virtualenvs"
+venv = "C:\\Users\\shaya\\AppData\\Local\\pypoetry\\Cache\\virtualenvs\\todoist-tree--TUXKLLc-py3.11"

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "todoist-tree"
-version = "0.1.0"
+version = "0.1.1"
 description = "Create a tree from Todoist projects > sections > tasks"
 authors = ["Shay Hill <shay_public@hotmail.com>"]
 readme = "README.md"
@@ -18,7 +18,7 @@ types-requests = "^2.28.11.8"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.1.0"
+version = "0.1.1"
 tag_format = "$version"
 version_files = [
     "pyproject.toml:^version"

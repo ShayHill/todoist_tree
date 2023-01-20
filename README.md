@@ -41,7 +41,7 @@ while not complete:
     time.sleep(5)
 ```
 
-The tree isn't doesn't have one root. `map_id_to_branch` maps the id[1] of each project, section, and task to a node. Top-level projects will not have parents, so they are effectively roots of their own trees.
+The tree doesn't have one root. `map_id_to_branch` maps the id[1] of each project, section, and task to a node. Top-level projects will not have parents, so they are effectively roots of their own trees.
 
 See [todoist_bot](https://github.com/ShayHill/todoist_bot) for a full example.
 

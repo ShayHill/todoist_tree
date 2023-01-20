@@ -12,13 +12,13 @@ from requests.structures import CaseInsensitiveDict
 SYNC_URL = "https://api.todoist.com/sync/v9/sync"
 
 
-def new_headers(api_key: str) -> CaseInsensitiveDict[str]:
+def new_headers(api_token: str) -> CaseInsensitiveDict[str]:
     """Create a new headers dictionary for requests to the Todoist sync API.
 
-    :param api_key: The API key for the Todoist account.
+    :param api_token: The API token for the Todoist account.
     :return: A dictionary of headers for requests to the Todoist sync API.
     """
     headers: CaseInsensitiveDict[str] = CaseInsensitiveDict()
     headers["Content-Type"] = "application/json"
-    headers["Authorization"] = "Bearer " + api_key
+    headers["Authorization"] = "Bearer " + api_token
     return headers

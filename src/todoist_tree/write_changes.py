@@ -7,6 +7,8 @@ changes will be written to Todoist.
 :created: 2022-12-12
 """
 
+from __future__ import annotations
+
 import json
 import time
 import uuid
@@ -92,7 +94,7 @@ def _write_some_changes(
     :return: sync_token from the API
     """
     resp = requests.post(
-        SYNC_URL, headers=headers, data=json.dumps({"commands": commands}, timeout=None)
+        SYNC_URL, headers=headers, data=json.dumps({"commands": commands})
     )
     resp.raise_for_status()
     return str(resp.json()["sync_token"])

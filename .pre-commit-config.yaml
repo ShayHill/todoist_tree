@@ -112,7 +112,7 @@ repos:
     - id: ruff
       args:
       - --select=ALL
-      - --ignore=D213,COM812,T201,BLE001,ANN101,D203,A003,S107,S113,S101
+      - --ignore=D213,COM812,T201,BLE001,ANN101,D203,A003,S107,S113,TCH003
       - --fix
 
 # reads pyproject.toml for additional config

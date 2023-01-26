@@ -49,7 +49,6 @@ def _node_sort_key(node: Node[_ModelT]) -> tuple[int, int]:
     if isinstance(node.data, Section):
         return 2, node.data.section_order
     if node.data.parent_id:
-        assert isinstance(node.data, Project)
         return 3, node.data.child_order
     msg = f"Unexpected node type: {node.data}"
     raise ValueError(msg)
@@ -135,8 +134,7 @@ def _place_subs(id2node: dict[str, Node[Project]] | dict[str, Node[Task]]) -> No
         found_parent = False
         for _ in range(len(queue)):
             child = queue.popleft()
-            parent_id = child.data.parent_id
-            assert parent_id is not None
+            parent_id = str(child.data.parent_id)
             try:
                 id2node[parent_id].add_child(child)
                 found_parent = True

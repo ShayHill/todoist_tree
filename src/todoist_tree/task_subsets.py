@@ -3,18 +3,20 @@
 :author: Shay Hill
 :created: 2022-12-12
 """
+from __future__ import annotations
 
 from contextlib import suppress
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
-from todoist_tree.read_changes import Project, Section, Task
-
-_PST = Union[Project, Section, Task]
+from todoist_tree.read_changes import Project, Section
 
 if TYPE_CHECKING:
     from typing import Iterator
 
+    from todoist_tree.read_changes import Task
     from todoist_tree.tree import AnyNode
+
+    _PST = Project | Section | Task
 
 
 def _has_suffix(suffix: str, model: Project | Section | Task) -> bool:
@@ -65,12 +67,9 @@ def select_serial(
     selected: dict[str, Task] = {}
 
     for model in _filter_for_suffix(suffix, *projects, *sections, *tasks):
-        with suppress(StopIteration):
-            model_id = model.id
-            assert model_id is not None
-            with suppress(StopIteration):
-                next_task = next(id2node[model_id].iter_childless_tasks())
-                selected[next_task.id] = next_task
+        with suppress(StopIteration), suppress(StopIteration):
+            next_task = next(id2node[model.id].iter_childless_tasks())
+            selected[next_task.id] = next_task
 
     return list(selected.values()), [x for x in tasks if x.id not in selected]
 
@@ -94,9 +93,7 @@ def select_parallel(
     selected: dict[str, Task] = {}
 
     for model in _filter_for_suffix(suffix, *projects, *sections, *tasks):
-        model_id = model.id
-        assert model_id is not None
-        selected.update({x.id: x for x in id2node[model_id].iter_childless_tasks()})
+        selected.update({x.id: x for x in id2node[model.id].iter_childless_tasks()})
 
     return list(selected.values()), [x for x in tasks if x.id not in selected]
 
@@ -120,8 +117,6 @@ def select_all(
     selected: dict[str, Task] = {}
 
     for model in _filter_for_suffix(suffix, *projects, *sections, *tasks):
-        model_id = model.id
-        assert model_id is not None
-        selected.update({x.id: x for x in id2node[model_id].iter_tasks()})
+        selected.update({x.id: x for x in id2node[model.id].iter_tasks()})
 
     return list(selected.values()), [x for x in tasks if x.id not in selected]

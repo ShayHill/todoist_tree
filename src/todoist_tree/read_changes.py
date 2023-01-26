@@ -11,102 +11,74 @@ then trying again.
 :created: 2022-12-28
 """
 
-import dataclasses
+from __future__ import annotations
+
 import json
 import time
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any
 
 import requests
+from pydantic import BaseModel
 
 from todoist_tree.headers import SYNC_URL
 
 if TYPE_CHECKING:
+
     from requests.structures import CaseInsensitiveDict
 
-# This should cover everything in Todoist response.json()
-_JsonDictValue = str | int | bool | None | list["_JsonDict"] | dict[str, "_JsonDict"]
-_JsonDict = dict[str, _JsonDictValue]
-_Objects = list[_JsonDict]
 
 # This is everything this project will look at.
 _RESOURCE_TYPES = ("items", "labels", "projects", "sections")
 
 
-@dataclasses.dataclass
-class _Model:
-    data: _JsonDict
-    id: str = dataclasses.field(init=False)
+class _Response(BaseModel):
+    """Todoist sync response."""
 
-    def __post_init__(self) -> None:
-        """Cast some properties."""
-        self.id = cast(str, self.data["id"])
-
-    def __getattr__(self, name: str) -> _JsonDictValue:
-        """Get attribute from data dict.
-
-        :param name: Attribute name.
-        :return: self.data[name]
-        :raise AttributeError: If attribute is not found.
-        """
-        try:
-            return self.data[name]
-        except KeyError as e:
-            msg = f"{self.__class__.__name__} has no attribute {name}"
-            raise AttributeError(msg) from e
+    full_sync: bool
+    sync_token: str
+    labels: list[dict[str, Any]]
+    projects: list[dict[str, Any]]
+    sections: list[dict[str, Any]]
+    items: list[dict[str, Any]]
 
 
-Label = type("Label", (_Model,), {})
+class _Model(BaseModel):
+    """Base model for type casting Todoist response."""
+
+    id: str
+
+
+class Label(_Model):
+    """Todoist label."""
+
+    name: str
 
 
 class Project(_Model):
-    """Project model."""
+    """Todoist project."""
 
-    name: str = dataclasses.field(init=False)
-    child_order: int = dataclasses.field(init=False)
-    parent_id: str = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Cast some properties."""
-        super().__post_init__()
-        self.name = cast(str, self.data["name"])
-        self.child_order = cast(int, self.data["child_order"])
-        self.parent_id = cast(str, self.data["parent_id"])
+    name: str
+    child_order: int
+    parent_id: str | None = None
 
 
 class Section(_Model):
-    """Project model."""
+    """Todoist section."""
 
-    name: str = dataclasses.field(init=False)
-    section_order: int = dataclasses.field(init=False)
-    project_id: str = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Cast some properties."""
-        super().__post_init__()
-        self.name = cast(str, self.data["name"])
-        self.section_order = cast(int, self.data["section_order"])
-        self.project_id = cast(str, self.data["project_id"])
+    name: str
+    section_order: int
+    project_id: str
 
 
 class Task(_Model):
-    """Task model."""
+    """Todoist task (item)."""
 
-    labels: list[str] = dataclasses.field(init=False)
-    content: str = dataclasses.field(init=False)
-    child_order: int = dataclasses.field(init=False)
-    parent_id: str = dataclasses.field(init=False)
-    project_id: str = dataclasses.field(init=False)
-    section_id: str = dataclasses.field(init=False)
-
-    def __post_init__(self) -> None:
-        """Cast some properties."""
-        super().__post_init__()
-        self.labels = cast(list[str], self.data["labels"])
-        self.content = cast(str, self.data["content"])
-        self.child_order = cast(int, self.data["child_order"])
-        self.parent_id = cast(str, self.data["parent_id"])
-        self.project_id = cast(str, self.data["project_id"])
-        self.section_id = cast(str, self.data["section_id"])
+    labels: list[str]
+    content: str
+    child_order: int
+    parent_id: str | None = None
+    project_id: str
+    section_id: str | None = None
 
 
 class Todoist:
@@ -119,7 +91,7 @@ class Todoist:
     isintance() (and other nice ways to sort objects) a little less straightforward.
     """
 
-    def __init__(self, resp_json: _JsonDict) -> None:
+    def __init__(self, resp_json: _Response) -> None:
         """Initialize a Todoist object from a Todoist response.json().
 
         :param resp_json: The response.json() from a Todoist API call
@@ -128,11 +100,11 @@ class Todoist:
         create a list of _Model instances. For resource types with a None value in
         _RESOURCE_TYPES, assign the returned value to an attribute of the same name.
         """
-        self.sync_token = cast(str, resp_json["sync_token"])
-        self.labels = [Label(x) for x in cast(_Objects, resp_json["labels"])]
-        self.projects = [Project(x) for x in cast(_Objects, resp_json["projects"])]
-        self.sections = [Section(x) for x in cast(_Objects, resp_json["sections"])]
-        self.tasks = [Task(x) for x in cast(_Objects, resp_json["items"])]
+        self.sync_token = resp_json.sync_token
+        self.labels = [Label(**x) for x in resp_json.labels]
+        self.projects = [Project(**x) for x in resp_json.projects]
+        self.sections = [Section(**x) for x in resp_json.sections]
+        self.tasks = [Task(**x) for x in resp_json.items]
 
 
 def read_changes(
@@ -150,21 +122,19 @@ def read_changes(
     """
     data = {"sync_token": sync_token, "resource_types": list(_RESOURCE_TYPES)}
     try:
-        resp = requests.post(
-            SYNC_URL, headers=headers, data=json.dumps(data), timeout=None
-        )
+        resp = requests.post(SYNC_URL, headers=headers, data=json.dumps(data))
         resp.raise_for_status()
     except Exception as e:
         print(f"Failed to reach Todoist: {e}")
         return None
 
-    resp_json = cast(_JsonDict, resp.json())
+    resp_json = _Response(**resp.json())
 
-    if not any(resp_json[r] for r in _RESOURCE_TYPES):
+    if not any(getattr(resp_json, r) for r in _RESOURCE_TYPES):
         print("No changes since last sync")
         return None
 
-    if not resp_json["full_sync"]:
+    if not resp_json.full_sync:
         # changes have been made, return all data
         time.sleep(1)
         return read_changes(headers)

@@ -5,12 +5,16 @@
 """
 
 from contextlib import suppress
-from typing import Iterator, TypeAlias
+from typing import TYPE_CHECKING, Union
 
 from todoist_tree.read_changes import Project, Section, Task
-from todoist_tree.tree import AnyNode
 
-_PST: TypeAlias = Project | Section | Task
+_PST = Union[Project, Section, Task]
+
+if TYPE_CHECKING:
+    from typing import Iterator
+
+    from todoist_tree.tree import AnyNode
 
 
 def _has_suffix(suffix: str, model: Project | Section | Task) -> bool:
@@ -22,10 +26,7 @@ def _has_suffix(suffix: str, model: Project | Section | Task) -> bool:
     Projects, Sections, and Tasks don't use the same attribute for the name. Tasks
     use "content", Projects and Sections use "name".
     """
-    if isinstance(model, (Project, Section)):
-        name = model.name
-    else:
-        name = model.content
+    name = model.name if isinstance(model, (Project, Section)) else model.content
 
     return name.strip().endswith(suffix)
 
@@ -61,7 +62,6 @@ def select_serial(
     :param suffix: a suffix to identify serial tasks
     :return: a tuple of (selected, rejected) tasks
     """
-
     selected: dict[str, Task] = {}
 
     for model in _filter_for_suffix(suffix, *projects, *sections, *tasks):

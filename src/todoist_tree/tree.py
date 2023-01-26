@@ -12,11 +12,15 @@ and so on.
 from __future__ import annotations
 
 from collections import deque
-from typing import Any, Generic, Iterator, TypeAlias, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from todoist_tree.read_changes import Project, Section, Task
 
-_Model: TypeAlias = Project | Section | Task
+if TYPE_CHECKING:
+    from typing import Any, Iterator
+
+
+_Model = Project | Section | Task
 _ModelT = TypeVar("_ModelT", bound=_Model)
 
 
@@ -47,13 +51,18 @@ def _node_sort_key(node: Node[_ModelT]) -> tuple[int, int]:
     if node.data.parent_id:
         assert isinstance(node.data, Project)
         return 3, node.data.child_order
-    raise ValueError(f"Unexpected node type: {node.data}")
+    msg = f"Unexpected node type: {node.data}"
+    raise ValueError(msg)
 
 
 class Node(Generic[_ModelT]):
     """A node in a tree of projects, sections, and tasks."""
 
-    def __init__(self, model: _ModelT):
+    def __init__(self, model: _ModelT) -> None:
+        """Initialize a node.
+
+        :param model: the model object that this node represents
+        """
         self.data: _ModelT = model
         self._children: list[Node[Any]] = []
         self._are_children_sorted: bool = False
@@ -65,10 +74,11 @@ class Node(Generic[_ModelT]):
         :raise AttributeError: if the children have already been sorted
         """
         if self._are_children_sorted:
-            raise AttributeError("Cannot add a child to a sorted node")
+            msg = "Cannot add a child to a sorted node"
+            raise AttributeError(msg)
         self._children.append(child)
 
-    def _sort_children(self):
+    def _sort_children(self) -> None:
         """Sort the children of this node.
 
         :effect: sorts children under this node
@@ -133,7 +143,8 @@ def _place_subs(id2node: dict[str, Node[Project]] | dict[str, Node[Task]]) -> No
             except KeyError:
                 queue.append(child)
         if not found_parent:
-            raise AttributeError(f"Could not find parents for nodes {queue}")
+            msg = f"Could not find parents for nodes {queue}"
+            raise AttributeError(msg)
 
 
 def map_id_to_branch(

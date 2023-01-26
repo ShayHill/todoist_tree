@@ -14,12 +14,14 @@ then trying again.
 import dataclasses
 import json
 import time
-from typing import Optional, cast
+from typing import TYPE_CHECKING, cast
 
 import requests
-from requests.structures import CaseInsensitiveDict
 
 from todoist_tree.headers import SYNC_URL
+
+if TYPE_CHECKING:
+    from requests.structures import CaseInsensitiveDict
 
 # This should cover everything in Todoist response.json()
 _JsonDictValue = str | int | bool | None | list["_JsonDict"] | dict[str, "_JsonDict"]
@@ -49,9 +51,8 @@ class _Model:
         try:
             return self.data[name]
         except KeyError as e:
-            raise AttributeError(
-                f"{self.__class__.__name__} has no attribute {name}"
-            ) from e
+            msg = f"{self.__class__.__name__} has no attribute {name}"
+            raise AttributeError(msg) from e
 
 
 Label = type("Label", (_Model,), {})
@@ -119,7 +120,7 @@ class Todoist:
     """
 
     def __init__(self, resp_json: _JsonDict) -> None:
-        """Initialize a Todoist object from a Todoist response.json()
+        """Initialize a Todoist object from a Todoist response.json().
 
         :param resp_json: The response.json() from a Todoist API call
 
@@ -136,7 +137,7 @@ class Todoist:
 
 def read_changes(
     headers: CaseInsensitiveDict[str], sync_token: str = "*"
-) -> Optional[Todoist]:
+) -> Todoist | None:
     """Load changes from Todoist or raise exception.
 
     :param headers: Headers for the request (produced by headers.get_headers)
@@ -149,7 +150,9 @@ def read_changes(
     """
     data = {"sync_token": sync_token, "resource_types": list(_RESOURCE_TYPES)}
     try:
-        resp = requests.post(SYNC_URL, headers=headers, data=json.dumps(data))
+        resp = requests.post(
+            SYNC_URL, headers=headers, data=json.dumps(data), timeout=None
+        )
         resp.raise_for_status()
     except Exception as e:
         print(f"Failed to reach Todoist: {e}")
@@ -167,5 +170,4 @@ def read_changes(
         return read_changes(headers)
 
     print("Changes found, refreshing all data")
-    todoist = Todoist(resp_json)
-    return todoist
+    return Todoist(resp_json)

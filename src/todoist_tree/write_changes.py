@@ -10,12 +10,16 @@ changes will be written to Todoist.
 import json
 import time
 import uuid
+from typing import TYPE_CHECKING
 
 import requests
-from requests.structures import CaseInsensitiveDict
 
 from todoist_tree.headers import SYNC_URL
-from todoist_tree.read_changes import Task
+
+if TYPE_CHECKING:
+    from requests.structures import CaseInsensitiveDict
+
+    from todoist_tree.read_changes import Task
 
 # commands to send to Todist API. Bigger isn't much faster. I don't know what the
 # soft limit is, but I get a lot of bad requests over a few hundred.
@@ -24,7 +28,7 @@ _COMMAND_CHUNK_SIZE = 99
 Command = dict[str, str | dict[str, str | int | list[str]]]
 
 
-def queue_new_label(commands: list[Command], label: str):
+def queue_new_label(commands: list[Command], label: str) -> None:
     """Return a dictionary (command) to later add a new personal label.
 
     :param commands: a list of commands to which the new command will be appended
@@ -42,7 +46,7 @@ def queue_new_label(commands: list[Command], label: str):
     )
 
 
-def queue_add_label(commands: list[Command], task: Task, label: str):
+def queue_add_label(commands: list[Command], task: Task, label: str) -> None:
     """Return a dictionary (command) to add a label to an item.
 
     :param commands: a list of commands to which the new command will be appended
@@ -55,12 +59,12 @@ def queue_add_label(commands: list[Command], task: Task, label: str):
         {
             "type": "item_update",
             "uuid": uuid.uuid4().hex,
-            "args": {"id": task.id, "labels": task.labels + [label]},
+            "args": {"id": task.id, "labels": [*task.labels, label]},
         }
     )
 
 
-def queue_remove_label(commands: list[Command], task: Task, label: str):
+def queue_remove_label(commands: list[Command], task: Task, label: str) -> None:
     """Return a dictionary (command) to remove a label from an item.
 
     :param commands: a list of commands to which the new command will be appended
@@ -88,7 +92,7 @@ def _write_some_changes(
     :return: sync_token from the API
     """
     resp = requests.post(
-        SYNC_URL, headers=headers, data=json.dumps({"commands": commands})
+        SYNC_URL, headers=headers, data=json.dumps({"commands": commands}, timeout=None)
     )
     resp.raise_for_status()
     return str(resp.json()["sync_token"])

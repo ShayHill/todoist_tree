@@ -121,7 +121,7 @@ repos:
   # ANN202 Missing return type annotation for private function (wants -> None everywhere)
   # B905 zip() without an explicit strict= parameter
   # COM812 Trailing comma missing
-  # D211 no blank line before class
+  # D203 1 blank line required before class docstring
   # D213 multi line summary second line
   # I001 Inport block is un-sorted or un-formatted
   # ISC003 Explicitly concatenated string should be implicitly concatenated
@@ -141,7 +141,7 @@ repos:
       exclude: "tests"
       args:
       - --select=ALL
-      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D211,D213,I001,ISC003,N802,N806,PGH003,PLR0913,PTH108,A003,S107,S113,BLE001
+      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,I001,ISC003,N802,N806,PGH003,PLR0913,PTH108,A003,S107,S113,BLE001
       - --fix
 
 # reads pyproject.toml for additional config

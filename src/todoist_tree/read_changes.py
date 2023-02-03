@@ -28,37 +28,33 @@ if TYPE_CHECKING:
 
 
 # This is everything this project will look at.
-_RESOURCE_TYPES = ("items", "labels", "projects", "sections")
-
-
-class _Response(BaseModel):
-
-    """Todoist sync response."""
-
-    full_sync: bool
-    sync_token: str
-    labels: list[dict[str, Any]]
-    projects: list[dict[str, Any]]
-    sections: list[dict[str, Any]]
-    items: list[dict[str, Any]]
+_RESOURCE_TYPES = ("notes", "items", "labels", "projects", "sections")
 
 
 class _Model(BaseModel):
-
     """Base model for type casting Todoist response."""
 
     id: str
 
 
-class Label(_Model):
+class Comment(_Model):
+    """Todoist comment (note)."""
 
+    added_at: str = ""
+    added_by_uid: str = ""
+    child_order: int = 0
+    content: str = ""
+    item_id: str = ""
+    user_id: str = ""
+
+
+class Label(_Model):
     """Todoist label."""
 
     name: str
 
 
 class Project(_Model):
-
     """Todoist project."""
 
     name: str
@@ -67,7 +63,6 @@ class Project(_Model):
 
 
 class Section(_Model):
-
     """Todoist section."""
 
     name: str
@@ -76,19 +71,34 @@ class Section(_Model):
 
 
 class Task(_Model):
-
     """Todoist task (item)."""
 
-    labels: list[str]
-    content: str
-    child_order: int
+    added_at: str = ""
+    added_by_uid: str = ""
+    assigned_by_uid: str | None = None
+    child_order: int = 0
+    content: str = ""
+    description: str = ""
+    labels: list[str] = []
     parent_id: str | None = None
-    project_id: str
+    priority: int = 0
+    project_id: str | None = ""
     section_id: str | None = None
 
 
-class Todoist:
+class _Response(BaseModel):
+    """Todoist sync response."""
 
+    full_sync: bool
+    sync_token: str
+    notes: list[Comment]
+    labels: list[dict[str, Any]]
+    projects: list[dict[str, Any]]
+    sections: list[dict[str, Any]]
+    items: list[dict[str, Any]]
+
+
+class Todoist:
     """Todist data model.
 
     The api just returns projects, sections, tasks, etc. as a dictionary of lists of
@@ -108,6 +118,7 @@ class Todoist:
         _RESOURCE_TYPES, assign the returned value to an attribute of the same name.
         """
         self.sync_token = resp_json.sync_token
+        self.comments = resp_json.notes
         self.labels = [Label(**x) for x in resp_json.labels]
         self.projects = [Project(**x) for x in resp_json.projects]
         self.sections = [Section(**x) for x in resp_json.sections]

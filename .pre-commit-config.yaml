@@ -43,10 +43,17 @@ repos:
   rev: v0.991
   hooks:
   - id: mypy
-    exclude: "tests"
-    args:
-    - --ignore-missing-imports
-    files: ^(src/|tests/)
+    name: mypy
+    language: python
+    language_version: python 3.11
+    types: [python]
+    require_serial: true
+    verbose: true
+    additional_dependencies: ['types-requests']
+    # exclude: "tests"
+    # args:
+    # - --ignore-missing-imports
+    # files: ^(src/|tests/)
 
 - repo: https://github.com/psf/black
   rev: 22.12.0
@@ -107,12 +114,34 @@ repos:
     - --max-line-length=88
 
 - repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: 'v0.0.235'
+  # ignores
+  # ANN101 Missing type annotation for self in method
+  # ANN102 Missing type annotation for cls in classmethod
+  # ANN201 Missing return type annotation for public function
+  # ANN202 Missing return type annotation for private function (wants -> None everywhere)
+  # B905 zip() without an explicit strict= parameter
+  # COM812 Trailing comma missing
+  # D211 no blank line before class
+  # D213 multi line summary second line
+  # I001 Inport block is un-sorted or un-formatted
+  # ISC003 Explicitly concatenated string should be implicitly concatenated
+  # N802 Function name should be lowercase
+  # N806 Variable in function should be lowercase
+  # PGH003 Use specific rule codes when ignoring type issues
+  # PLR0913 Too many arguments to function call
+  # PTH108 os.unlink should be replaced by .unlink()
+  #
+  # A003 class attribute "id" is shadowning a python builtin
+  # S107 possible hardcoded password: "*"
+  # S113 probable use of requests call without timeout
+  # BLE001 Do not catch blind exception
+  rev: 'v0.0.238'
   hooks:
     - id: ruff
+      exclude: "tests"
       args:
       - --select=ALL
-      - --ignore=D213,COM812,T201,BLE001,ANN101,D203,A003,S107,S113,TCH003
+      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D211,D213,I001,ISC003,N802,N806,PGH003,PLR0913,PTH108,A003,S107,S113,BLE001
       - --fix
 
 # reads pyproject.toml for additional config

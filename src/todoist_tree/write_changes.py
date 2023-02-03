@@ -37,7 +37,6 @@ def queue_new_label(commands: list[Command], label: str) -> None:
     :param label: label to add to personal labels
     :effect: the command is appended to the :calls: list of commands
     """
-    print(f"create personal label '{label}'")
     commands.append(
         {
             "type": "label_add",
@@ -56,7 +55,6 @@ def queue_add_label(commands: list[Command], task: Task, label: str) -> None:
     :param label: label to remove
     :effect: the command is appended to the :calls: list of commands
     """
-    print(f"add '{label}' to '{task.content}'")
     commands.append(
         {
             "type": "item_update",
@@ -74,7 +72,6 @@ def queue_remove_label(commands: list[Command], task: Task, label: str) -> None:
     :param label: label to remove
     :effect: the command is appended to the :calls: list of commands
     """
-    print(f"remove '{label}' from '{task.content}'")
     commands.append(
         {
             "type": "item_update",
@@ -117,8 +114,7 @@ def write_changes(
         return sync_token
     try:
         sync_token = _write_some_changes(headers, commands[:_COMMAND_CHUNK_SIZE])
-    except Exception as e:
-        print(e)
+    except Exception:
         # give up and start the whole main loop over
         return "*"
     time.sleep(1)

@@ -55,6 +55,7 @@ def _node_sort_key(node: Node[_ModelT]) -> tuple[int, int]:
 
 
 class Node(Generic[_ModelT]):
+
     """A node in a tree of projects, sections, and tasks."""
 
     def __init__(self, model: _ModelT) -> None:

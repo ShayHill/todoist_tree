@@ -32,6 +32,7 @@ _RESOURCE_TYPES = ("items", "labels", "projects", "sections")
 
 
 class _Response(BaseModel):
+
     """Todoist sync response."""
 
     full_sync: bool
@@ -43,18 +44,21 @@ class _Response(BaseModel):
 
 
 class _Model(BaseModel):
+
     """Base model for type casting Todoist response."""
 
     id: str
 
 
 class Label(_Model):
+
     """Todoist label."""
 
     name: str
 
 
 class Project(_Model):
+
     """Todoist project."""
 
     name: str
@@ -63,6 +67,7 @@ class Project(_Model):
 
 
 class Section(_Model):
+
     """Todoist section."""
 
     name: str
@@ -71,6 +76,7 @@ class Section(_Model):
 
 
 class Task(_Model):
+
     """Todoist task (item)."""
 
     labels: list[str]
@@ -82,6 +88,7 @@ class Task(_Model):
 
 
 class Todoist:
+
     """Todist data model.
 
     The api just returns projects, sections, tasks, etc. as a dictionary of lists of
@@ -124,14 +131,12 @@ def read_changes(
     try:
         resp = requests.post(SYNC_URL, headers=headers, data=json.dumps(data))
         resp.raise_for_status()
-    except Exception as e:
-        print(f"Failed to reach Todoist: {e}")
+    except Exception:
         return None
 
     resp_json = _Response(**resp.json())
 
     if not any(getattr(resp_json, r) for r in _RESOURCE_TYPES):
-        print("No changes since last sync")
         return None
 
     if not resp_json.full_sync:
@@ -139,5 +144,4 @@ def read_changes(
         time.sleep(1)
         return read_changes(headers)
 
-    print("Changes found, refreshing all data")
     return Todoist(resp_json)

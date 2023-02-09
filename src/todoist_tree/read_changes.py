@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import time
+import sys
 from typing import TYPE_CHECKING, Any
 
 import requests
@@ -26,6 +27,9 @@ if TYPE_CHECKING:
 
     from requests.structures import CaseInsensitiveDict
 
+# error codes with special handling
+_UNAUTHORIZED = 401
+_FORBIDDEN = 403
 
 # This is everything this project will look at.
 _RESOURCE_TYPES = ("notes", "items", "labels", "projects", "sections")
@@ -142,7 +146,18 @@ def read_changes(
     try:
         resp = requests.post(SYNC_URL, headers=headers, data=json.dumps(data))
         resp.raise_for_status()
-    except Exception:
+    # specific error messages for common errors
+    except requests.exceptions.HTTPError as e:
+        msg_tail = "Please check your token and try again."
+        if e.response.status_code == _UNAUTHORIZED:
+            _ = sys.stdout.write(f"Invalid API token. {msg_tail}\n")
+        elif e.response.status_code == _FORBIDDEN:
+            _ = sys.stdout.write(f"API token does not have access. {msg_tail}\n")
+        else:
+            _ = sys.stdout.write(f"Failed to reach Todoist: {e}\n")
+        return None
+    except Exception as e:
+        _ = sys.stdout.write(f"Failed to reach Todoist: {e}\n")
         return None
 
     resp_json = _Response(**resp.json())

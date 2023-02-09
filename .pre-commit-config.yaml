@@ -3,6 +3,8 @@ ci:
   autofix_commit_msg: 'style: pre-commit fixes'
   autoupdate_commit_msg: 'chore: update pre-commit hooks'
 
+exclude: tests
+
 repos:
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -142,7 +144,7 @@ repos:
       args:
       - --select=ALL
       - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,I001,ISC003,N802,N806,PGH003,PLR0913,PTH108,A003,S107,S113,BLE001
-      - --fix
+      # - --fix
 
 # reads pyproject.toml for additional config
 - repo: https://github.com/RobertCraigie/pyright-python

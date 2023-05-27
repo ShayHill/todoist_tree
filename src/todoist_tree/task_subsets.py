@@ -67,7 +67,7 @@ def select_serial(
     selected: dict[str, Task] = {}
 
     for model in _filter_for_suffix(suffix, *projects, *sections, *tasks):
-        with suppress(StopIteration), suppress(StopIteration):
+        with suppress(StopIteration):
             next_task = next(id2node[model.id].iter_childless_tasks())
             selected[next_task.id] = next_task
 

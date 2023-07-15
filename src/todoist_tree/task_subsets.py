@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from todoist_tree.read_changes import Project, Section
 
 if TYPE_CHECKING:
-    from typing import Iterator
+    from collections.abc import Iterator
 
     from todoist_tree.read_changes import Task
     from todoist_tree.tree import AnyNode
@@ -28,7 +28,7 @@ def _has_suffix(suffix: str, model: Project | Section | Task) -> bool:
     Projects, Sections, and Tasks don't use the same attribute for the name. Tasks
     use "content", Projects and Sections use "name".
     """
-    name = model.name if isinstance(model, (Project, Section)) else model.content
+    name = model.name if isinstance(model, Project | Section) else model.content
 
     return name.strip().endswith(suffix)
 

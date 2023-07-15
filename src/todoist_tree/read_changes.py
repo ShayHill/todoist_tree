@@ -23,7 +23,6 @@ from pydantic import BaseModel
 from todoist_tree.headers import SYNC_URL
 
 if TYPE_CHECKING:
-
     from requests.structures import CaseInsensitiveDict
 
 

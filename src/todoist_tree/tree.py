@@ -17,7 +17,8 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 from todoist_tree.read_changes import Project, Section, Task
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator
+    from typing import Any
+    from collections.abc import Iterator
 
 
 _Model = Project | Section | Task
@@ -55,7 +56,6 @@ def _node_sort_key(node: Node[_ModelT]) -> tuple[int, int]:
 
 
 class Node(Generic[_ModelT]):
-
     """A node in a tree of projects, sections, and tasks."""
 
     def __init__(self, model: _ModelT) -> None:
@@ -122,7 +122,9 @@ class Node(Generic[_ModelT]):
 AnyNode = Node[Project] | Node[Section] | Node[Task]
 
 
-def _place_subs(id2node: dict[str, Node[Project]] | dict[str, Node[Task]]) -> None:
+def _place_subs(
+    id2node: dict[str | None, Node[Project]] | dict[str | None, Node[Task]]
+) -> None:
     """Place subtasks or subprojects under their parents.
 
     :param id2node: map of node ids to nodes (includes parents and perhaps children)
@@ -148,7 +150,7 @@ def _place_subs(id2node: dict[str, Node[Project]] | dict[str, Node[Task]]) -> No
 
 def map_id_to_branch(
     projects: list[Project], sections: list[Section], tasks: list[Task]
-) -> dict[str, AnyNode]:
+) -> dict[str | None, AnyNode]:
     """Build a tree of nodes from the API cache.
 
     :param projects: all (sub)project nodes
@@ -159,16 +161,16 @@ def map_id_to_branch(
 
     There will not be a root node to this tree, every Project will be a root.
     """
-    project_nodes: dict[str, Node[Project]]
+    project_nodes: dict[str | None, Node[Project]]
     project_nodes = {p.id: Node(p) for p in projects}
     _place_subs(project_nodes)
 
-    section_nodes: dict[str, Node[Section]]
+    section_nodes: dict[str | None, Node[Section]]
     section_nodes = {s.id: Node(s) for s in sections}
     for sect in section_nodes.values():
         project_nodes[sect.data.project_id].add_child(sect)
 
-    task_nodes: dict[str, Node[Task]]
+    task_nodes: dict[str | None, Node[Task]]
     task_nodes = {t.id: Node(t) for t in tasks}
     _place_subs(task_nodes)
 
@@ -178,4 +180,5 @@ def map_id_to_branch(
         else:
             project_nodes[task.data.project_id].add_child(task)
 
-    return {**project_nodes, **section_nodes, **task_nodes}
+    nodes: dict[str | None, AnyNode] = {**project_nodes, **section_nodes, **task_nodes}
+    return nodes

@@ -32,7 +32,7 @@ repos:
       - --pytest-test-first
 
 - repo: https://github.com/python-poetry/poetry
-  rev: 1.3.0
+  rev: 1.5.0
   hooks:
     - id: poetry-check
     - id: poetry-lock
@@ -42,7 +42,7 @@ repos:
     #   - -o requirements.txt
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v0.991
+  rev: v1.3.0
   hooks:
   - id: mypy
     name: mypy
@@ -58,26 +58,26 @@ repos:
     # files: ^(src/|tests/)
 
 - repo: https://github.com/psf/black
-  rev: 22.12.0
+  rev: 23.3.0
   hooks:
   - id: black
     language_version: python3.10
     args: ["--skip-magic-trailing-comma"]
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.3.1
+  rev: v3.4.0
   hooks:
   - args:
     - --py37-plus
     id: pyupgrade
 
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.4.2
+  rev: v1.5.1
   hooks:
   - id: remove-tabs
 
 - repo: https://github.com/commitizen-tools/commitizen
-  rev: v2.40.0
+  rev: 3.2.2
   hooks:
   - id: commitizen
 
@@ -137,7 +137,7 @@ repos:
   # S107 possible hardcoded password: "*"
   # S113 probable use of requests call without timeout
   # BLE001 Do not catch blind exception
-  rev: 'v0.0.238'
+  rev: 'v0.0.270'
   hooks:
     - id: ruff
       exclude: "tests"
@@ -148,6 +148,6 @@ repos:
 
 # reads pyproject.toml for additional config
 - repo: https://github.com/RobertCraigie/pyright-python
-  rev: v1.1.291
+  rev: v1.1.310
   hooks:
     - id: pyright

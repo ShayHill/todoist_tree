@@ -24,7 +24,6 @@ from pydantic import BaseModel
 from todoist_tree.headers import SYNC_URL
 
 if TYPE_CHECKING:
-
     from requests.structures import CaseInsensitiveDict
 
 # error codes with special handling
@@ -82,6 +81,7 @@ class Task(_Model):
     assigned_by_uid: str | None = None
     child_order: int = 0
     content: str = ""
+    due: dict[str, Any] | None = None
     description: str = ""
     labels: list[str] = []
     parent_id: str | None = None

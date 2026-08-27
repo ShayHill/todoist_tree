@@ -3,6 +3,7 @@
 :author: Shay Hill
 :created: 2022-12-12
 """
+
 from __future__ import annotations
 
 from contextlib import suppress

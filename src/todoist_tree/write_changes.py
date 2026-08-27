@@ -91,7 +91,7 @@ def _write_some_changes(
     :return: sync_token from the API
     """
     resp = requests.post(
-        SYNC_URL, headers=headers, data=json.dumps({"commands": commands})
+        SYNC_URL, headers=headers, data=json.dumps({"commands": commands}), timeout=30
     )
     resp.raise_for_status()
     return str(resp.json()["sync_token"])
@@ -114,7 +114,7 @@ def write_changes(
         return sync_token
     try:
         sync_token = _write_some_changes(headers, commands[:_COMMAND_CHUNK_SIZE])
-    except Exception:
+    except Exception:  # noqa: BLE001
         # give up and start the whole main loop over
         return "*"
     time.sleep(1)

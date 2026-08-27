@@ -14,8 +14,8 @@ then trying again.
 from __future__ import annotations
 
 import json
-import time
 import sys
+import time
 from typing import TYPE_CHECKING, Any
 
 import requests
@@ -130,7 +130,8 @@ class Todoist:
 
 
 def read_changes(
-    headers: CaseInsensitiveDict[str], sync_token: str = "*"
+    headers: CaseInsensitiveDict[str],
+    sync_token: str = "*",  # noqa: S107
 ) -> Todoist | None:
     """Load changes from Todoist or raise exception.
 
@@ -144,10 +145,15 @@ def read_changes(
     """
     data = {"sync_token": sync_token, "resource_types": list(_RESOURCE_TYPES)}
     try:
-        resp = requests.post(SYNC_URL, headers=headers, data=json.dumps(data))
+        resp = requests.post(
+            SYNC_URL, headers=headers, data=json.dumps(data), timeout=30
+        )
         resp.raise_for_status()
     # specific error messages for common errors
     except requests.exceptions.HTTPError as e:
+        if e.response is None:
+            msg = "requests.exceptions.HTTPError has no response attribute."
+            raise RuntimeError(msg) from e
         msg_tail = "Please check your token and try again."
         if e.response.status_code == _UNAUTHORIZED:
             _ = sys.stdout.write(f"Invalid API token. {msg_tail}\n")
@@ -156,7 +162,7 @@ def read_changes(
         else:
             _ = sys.stdout.write(f"Failed to reach Todoist: {e}\n")
         return None
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         _ = sys.stdout.write(f"Failed to reach Todoist: {e}\n")
         return None
 

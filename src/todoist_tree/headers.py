@@ -6,10 +6,9 @@ Call this once and pass the functions that call the SYNC API.
 :created: 2022-12-28
 """
 
-
 from requests.structures import CaseInsensitiveDict
 
-SYNC_URL = "https://api.todoist.com/sync/v9/sync"
+SYNC_URL = "https://api.todoist.com/api/v1/sync"
 
 
 def new_headers(api_token: str) -> CaseInsensitiveDict[str]:

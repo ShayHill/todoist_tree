@@ -9,6 +9,7 @@ and so on.
 :author: Shay Hill
 :created: 2022-12-12
 """
+
 from __future__ import annotations
 
 from collections import deque
@@ -17,8 +18,8 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 from todoist_tree.read_changes import Project, Section, Task
 
 if TYPE_CHECKING:
-    from typing import Any
     from collections.abc import Iterator
+    from typing import Any
 
 
 _Model = Project | Section | Task
@@ -123,7 +124,7 @@ AnyNode = Node[Project] | Node[Section] | Node[Task]
 
 
 def _place_subs(
-    id2node: dict[str | None, Node[Project]] | dict[str | None, Node[Task]]
+    id2node: dict[str | None, Node[Project]] | dict[str | None, Node[Task]],
 ) -> None:
     """Place subtasks or subprojects under their parents.
 

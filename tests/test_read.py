@@ -4,12 +4,15 @@
 :created: 2023-02-06
 """
 
-from todoist_tree import read_changes, headers
 import os
+
+import pytest
+
+from todoist_tree import headers, read_changes
 
 
 class TestRead:
-    def test_wrong_api_token(self, capfd):
+    def test_wrong_api_token(self, capfd: pytest.CaptureFixture[str]) -> None:
         """Test that an invalid API token raises an exception."""
         headers_ = headers.new_headers("invalid_api_token")
         _ = read_changes.read_changes(headers_)
@@ -17,7 +20,7 @@ class TestRead:
         msg_tail = "Please check your token and try again."
         assert msg_tail in out
 
-    def test_valid_api_token(self):
+    def test_valid_api_token(self) -> None:
         """Test that a valid API token does not raise an exception.
 
         This may not work, because the server may not be available when running the

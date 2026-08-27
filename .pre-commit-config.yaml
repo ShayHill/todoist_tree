@@ -1,153 +1,117 @@
 ci:
+  skip: [pyright]
 
-  autofix_commit_msg: 'style: pre-commit fixes'
-  autoupdate_commit_msg: 'chore: update pre-commit hooks'
-
-exclude: tests
+exclude: "typings"
 
 repos:
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v6.0.0
   hooks:
     - id: check-added-large-files
     - id: check-ast
     - id: check-case-conflict
+    - id: check-docstring-first
+    - id: check-executables-have-shebangs
+    - id: check-json
     - id: check-merge-conflict
+      args:
+        - --assume-in-merge
+    - id: check-shebang-scripts-are-executable
     - id: check-symlinks
-    - id: check-yaml
     - id: check-toml
+    - id: check-vcs-permalinks
     - id: check-xml
+    - id: check-yaml
     - id: debug-statements
+    - id: destroyed-symlinks
+    # - id: detect-aws-credentials
     - id: detect-private-key
     - id: end-of-file-fixer
     - id: mixed-line-ending
     - id: requirements-txt-fixer
     - id: trailing-whitespace
-    - id: fix-encoding-pragma
-      args:
-      - --remove
     - id: name-tests-test
       args:
       - --pytest-test-first
-
-- repo: https://github.com/python-poetry/poetry
-  rev: 1.5.0
-  hooks:
-    - id: poetry-check
-    - id: poetry-lock
-    # - id: poetry-export
-    #   args:
-    #   - -f requirements.txt
-    #   - -o requirements.txt
+    - id: no-commit-to-branch
+    - id: pretty-format-json
+      args: ['--autofix']
+    # - id: sort-simple-yaml
+        # files: .pre-commit-config.yaml
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.3.0
+  rev: v2.3.1
   hooks:
   - id: mypy
-    name: mypy
-    language: python
-    language_version: python 3.11
     types: [python]
     require_serial: true
     verbose: true
-    additional_dependencies: ['types-requests']
+    # additional_dependencies: ['types-requests']
     # exclude: "tests"
     # args:
     # - --ignore-missing-imports
     # files: ^(src/|tests/)
 
-- repo: https://github.com/psf/black
-  rev: 23.3.0
-  hooks:
-  - id: black
-    language_version: python3.10
-    args: ["--skip-magic-trailing-comma"]
-
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.4.0
+  rev: v3.21.2
   hooks:
   - args:
-    - --py37-plus
+    - --py310-plus
     id: pyupgrade
 
 - repo: https://github.com/Lucas-C/pre-commit-hooks
-  rev: v1.5.1
+  rev: v1.5.6
   hooks:
   - id: remove-tabs
 
-- repo: https://github.com/commitizen-tools/commitizen
-  rev: 3.2.2
-  hooks:
-  - id: commitizen
+# - repo: https://github.com/commitizen-tools/commitizen
+#   rev: v2.40.0
+#   hooks:
+#   - id: commitizen
 
-- repo: https://github.com/pre-commit/mirrors-pylint
-  rev: v3.0.0a5
-  hooks:
-  - id: pylint
-    exclude: "tests"
-    name: pylint
-    args:
-    - --good-names=i,j,_,e,f,id
-    - --disable=too-many-instance-attributes
-    - --disable=too-many-locals
-    - --disable=too-few-public-methods
-    - --disable=protected-access
-    - --disable=c-extension-no-member
-    - --disable=too-many-instance-attributes
-    - --disable=duplicate-code
-    - --disable=too-many-locals
-    - --disable=import-error
-    - --disable=too-many-arguments
-    - --disable=broad-except
-    - --disable=used-before-assignment
-    - --load-plugins=pylint.extensions.docparams
-    - --accept-no-param-doc=n
-    - --accept-no-raise-doc=n
-    - --accept-no-return-doc=n
-    - --accept-no-yields-doc=n
+# # This will only work with pylint installed in the venv
+# - repo: local
+#   hooks:
+#   - id: pylint
+#     exclude: "tests"
+#     name: pylint
+#     entry: ./.venv/Scripts/pylint.exe
+#     language: system
+#     types: [python]
+#     args:
+#     - --ignore-patterns=.venv
+#     - --good-names=i,j,_,f
+#     # - --disable=protected-access
+#     # - --disable=no-member
+#     # - --disable=import-error
+#     # - --disable=no-name-in-module
+#     - --disable=redundant-returns-doc # many false positives
+#     - --disable=too-many-arguments
+#     - --disable=too-many-instance-attributes
+#     - --disable=redefined-builtin # sticking with edge.next
+#     - --disable=invalid-name # for _TMeshElem and similar type hints
+#     - --disable=useless-return # conflicts with mypy
+#     - --disable=assignment-from-no-return # prevents overloading Attrib methods to only raise an Exception
+#     - --disable=useless-parent-delegation
+#     - --disable=R0801 # Similar lines in multiple files
+#     - --load-plugins=pylint.extensions.docparams
+#     - --accept-no-param-doc=n
+#     - --accept-no-raise-doc=n
+#     - --accept-no-return-doc=n
+#     - --accept-no-yields-doc=n
 
-- repo: https://github.com/pycqa/flake8
-  rev: 6.0.0
-  hooks:
-  - id: flake8
-    exclude: "tests"
-    args:
-    - --max-line-length=88
-
+# ruff config (select/ignore/fixable/target-version) lives in pyproject.toml
 - repo: https://github.com/charliermarsh/ruff-pre-commit
-  # ignores
-  # ANN101 Missing type annotation for self in method
-  # ANN102 Missing type annotation for cls in classmethod
-  # ANN201 Missing return type annotation for public function
-  # ANN202 Missing return type annotation for private function (wants -> None everywhere)
-  # B905 zip() without an explicit strict= parameter
-  # COM812 Trailing comma missing
-  # D203 1 blank line required before class docstring
-  # D213 multi line summary second line
-  # I001 Inport block is un-sorted or un-formatted
-  # ISC003 Explicitly concatenated string should be implicitly concatenated
-  # N802 Function name should be lowercase
-  # N806 Variable in function should be lowercase
-  # PGH003 Use specific rule codes when ignoring type issues
-  # PLR0913 Too many arguments to function call
-  # PTH108 os.unlink should be replaced by .unlink()
-  #
-  # A003 class attribute "id" is shadowning a python builtin
-  # S107 possible hardcoded password: "*"
-  # S113 probable use of requests call without timeout
-  # BLE001 Do not catch blind exception
-  rev: 'v0.0.270'
+  rev: 'v0.16.4'
   hooks:
     - id: ruff
-      exclude: "tests"
-      args:
-      - --select=ALL
-      - --ignore=ANN101,ANN102,ANN201,ANN202,B905,COM812,D203,D213,I001,ISC003,N802,N806,PGH003,PLR0913,PTH108,A003,S107,S113,BLE001
-      # - --fix
+      args: ["--fix"]
+    - id: ruff-format
+      name: "ruff-format"
 
-# reads pyproject.toml for additional config
-- repo: https://github.com/RobertCraigie/pyright-python
-  rev: v1.1.310
+# basedpyright config (select/ignore/fixable/target-version) lives in pyproject.toml
+- repo: https://github.com/DetachHead/basedpyright-pre-commit-mirror
+  rev: 1.39.10
   hooks:
-    - id: pyright
+  - id: basedpyright

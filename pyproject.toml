@@ -1,6 +1,6 @@
 [project]
 name = "todoist-tree"
-version = "0.5.1"
+version = "0.5.2"
 description = "Create a tree from Todoist projects > sections > tasks"
 readme = "README.md"
 license-files = ["LICENSE"]
@@ -36,7 +36,7 @@ dev = [
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.5.1"
+version = "0.5.2"
 tag_format = "$version"
 major-version-zero = true
 version_files = ["pyproject.toml:^version"]
